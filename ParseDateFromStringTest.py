@@ -61,6 +61,13 @@ class GetBackupsToRemoveTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             BackupAutoRemove.parse_date(regex_pattern, file, date_format)
 
+    def test_parse_date_invalid_format_two(self):
+        regex_pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}$"
+        file = "backup-2021-01-30"
+        date_format = "%Y-%d-%m"
+        with self.assertRaises(ValueError):
+            BackupAutoRemove.parse_date(regex_pattern, file, date_format)
+
     def test_parse_date_empty_filename(self):
         regex_pattern = "[0-9]{4}-[0-9]{2}-[0-9]{2}$"
         file = ""
