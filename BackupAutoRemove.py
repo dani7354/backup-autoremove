@@ -7,6 +7,7 @@ from time import strptime
 import os
 import re
 import sys
+import shutil
 import traceback
 
 def get_args():
@@ -88,7 +89,7 @@ if __name__ == "__main__":
             if os.path.exists(os.path.join(arguments["location"], backup)):
                 print(f"Removing {backup_path}...")
                 if os.path.isdir(backup_path):
-                    os.rmdir(backup_path)
+                    shutil.rmtree(backup_path)
                 elif os.path.isfile(backup_path):
                     os.remove(backup_path)
 
