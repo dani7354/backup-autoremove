@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 # dsp, 06-16-2021
+
 from time import strptime
 import re
 
@@ -19,6 +20,18 @@ def parse_date(regex_pattern, filename, date_format):
             date_time = strptime(regex_match.group())
         
         return date_time
-    
     return False
+
+def get_backups_to_remove(all_backups, max_backup_count):
+    backups_to_remove = []
+    remove_count = len(all_backups) - max_backup_count
+    if remove_count > 0:
+        all_backups.sort(key=lambda e: e[0])
+        for i in range (0, remove_count):
+            backups_to_remove.append(all_backups[i][1])
+    return backups_to_remove
+
+
+
+
 
