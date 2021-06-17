@@ -1,10 +1,22 @@
 #!/usr/bin/env python3
-# dsp, 06-16-2021
+# v. 1.00 (06-17-2021)
+# dsp 
 
+from argparse import ArgumentError, ArgumentParser
 from time import strptime
+import os
 import re
+import sys
+import traceback
 
-DEFAULT_MAX_BACKUPS = 10
+def get_args():
+    parser = ArgumentParser(description="Deletes the oldest backups (files or folders) at the specified location")
+    parser.add_argument("-l", "--location", dest="location", type=str, required=True, help="Folder containing the backup folders or files")
+    parser.add_argument("-d", "--date-format", dest="date-format", type=str, required=True, help="Format for parsing the date from the file or folder name (e.g. %Y-%m-%d)")
+    parser.add_argument("-p", "--regex-pattern", dest="regex-pattern", type=str, required=True, help="Regex pattern that matches the date in file or folder name")
+    parser.add_argument("-m", "--backup-count", dest="max_backups", type=int, required=False, help="Number of backups allowed at the specified location")
+    arguments = vars(parser.parse_args())
+    return arguments
 
 def parse_date(regex_pattern, filename, date_format):
     if regex_pattern is None or len(regex_pattern) < 1:
@@ -34,7 +46,58 @@ def get_backups_to_remove(all_backups, max_backup_count):
             backups_to_remove.append(all_backups[i][1])
     return backups_to_remove
 
+def location_is_valid(path):
+    if not path is None:
+        return os.path.isdir(path) and os.access(path, os.R_OK | os.W_OK)
+    return False 
 
+if __name__ == "__main__":
+    try:
+        print("Starting autoremove...")
+        
+        parser = ArgumentParser(description="Deletes the oldest backups (files or folders) at the specified location", add_help=False)
+        parser.add_argument("-l", "--location", dest="location", type=str, required=True, help="Folder containing the backup folders or files")
+        parser.add_argument("-d", "--date-format", dest="date_format", type=str, required=True, help="Format for parsing the date from the file or folder name (e.g. %Y-%m-%d)")
+        parser.add_argument("-p", "--regex-pattern", dest="regex_pattern", type=str, required=True, help="Regex pattern that matches the date in file or folder name")
+        parser.add_argument("-m", "--backup-count", dest="max_backups", type=int, required=True, help="Number of backups allowed at the specified location")
+        arguments = vars(parser.parse_args())
 
+        if not location_is_valid(arguments["location"]):
+            raise ValueError("Invalid value for argument for '-l, --location'. Check if the folder exists and the user has RW permissions!")
 
+        print(f"Reading files at {arguments['location']}")
+        files = os.listdir(arguments["location"])
+        backups = []
 
+        for file in files:
+            try:
+                backup_datetime = parse_date(arguments["regex_pattern"], file, arguments["date_format"])
+                if backup_datetime is False:
+                    continue
+                print(f"Backup found: {file}")
+                backups.append((backup_datetime, file))
+            except ValueError:
+                print(f"Error paring date from file: {file} - skipping to next!")
+                continue
+
+        print("Checking for backups to remove...") 
+        backups_to_remove = get_backups_to_remove(backups,arguments["max_backups"])
+        print(f"{len(backups_to_remove)} backups will be removed!")
+        for backup in backups_to_remove:
+            backup_path = os.path.join(arguments["location"], backup)
+            if os.path.exists(os.path.join(arguments["location"], backup)):
+                print(f"Removing {backup_path}...")
+                if os.path.isdir(backup_path):
+                    os.rmdir(backup_path)
+                elif os.path.isfile(backup_path):
+                    os.remove(backup_path)
+
+    except ValueError as error:
+        print(f"A ValueError was thrown: {error}\nStackTrace: {traceback.format_exc()}")
+        sys.exit(1)
+    except OSError as error:
+        print(f"An OSError was thrown: {error}\nStackTrace: {traceback.format_exc()}")
+        sys.exit(1)
+    except Exception as error:
+        print(f"An exception was thrown: {error}\nStackTrace: {traceback.format_exc()}")
+        sys.exit(1)
