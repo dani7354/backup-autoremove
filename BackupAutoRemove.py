@@ -23,8 +23,11 @@ def parse_date(regex_pattern, filename, date_format):
     return False
 
 def get_backups_to_remove(all_backups, max_backup_count):
+    if max_backup_count < 0:
+        raise ValueError("Argument 'max_backup_count' cannot be less than 0")
+
     backups_to_remove = []
-    remove_count = len(all_backups) - max_backup_count
+    remove_count = len(all_backups) - max_backup_count if not all_backups is None else 0
     if remove_count > 0:
         all_backups.sort(key=lambda e: e[0])
         for i in range (0, remove_count):

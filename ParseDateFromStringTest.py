@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-from datetime import date
+from time import strptime
 import unittest
 import BackupAutoRemove
-from time import strptime
+
 
 class GetBackupsToRemoveTest(unittest.TestCase):
 
