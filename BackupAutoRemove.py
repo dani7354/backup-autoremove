@@ -10,15 +10,6 @@ import sys
 import shutil
 import traceback
 
-def get_args():
-    parser = ArgumentParser(description="Deletes the oldest backups (files or folders) at the specified location")
-    parser.add_argument("-l", "--location", dest="location", type=str, required=True, help="Folder containing the backup folders or files")
-    parser.add_argument("-d", "--date-format", dest="date-format", type=str, required=True, help="Format for parsing the date from the file or folder name (e.g. %Y-%m-%d)")
-    parser.add_argument("-p", "--regex-pattern", dest="regex-pattern", type=str, required=True, help="Regex pattern that matches the date in file or folder name")
-    parser.add_argument("-m", "--backup-count", dest="max_backups", type=int, required=False, help="Number of backups allowed at the specified location")
-    arguments = vars(parser.parse_args())
-    return arguments
-
 def parse_date(regex_pattern, filename, date_format):
     if regex_pattern is None or len(regex_pattern) < 1:
         raise ValueError("Argument 'regex_pattern' cannot be None or empty!")
