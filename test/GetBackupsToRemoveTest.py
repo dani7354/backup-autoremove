@@ -61,5 +61,6 @@ class GetBackupsToRemoveTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             backup_autoremove.get_backups_to_remove(files, max_backups)
 
+
 if __name__ == "__main__":
     unittest.main()
