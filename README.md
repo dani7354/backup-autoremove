@@ -5,7 +5,7 @@ run as a cron job.
 ## Usage from terminal
 After having download the script, it can be run manually like this (but I suggest that you set it up as a cronjob)
 ```
-$ ./backup-auto-remove.py -l "/path/to/dir/containing/backups" -d "\%Y\%m\%d" -p "[0-9]{8}" -m 90
+$ ./backup-auto-remove.py -l "/path/to/dir/containing/backups" -f "backup_*" -d "\%Y\%m\%d" -p "[0-9]{8}" -m 90
 ```
 
 ### Arguments explained:
@@ -13,3 +13,4 @@ $ ./backup-auto-remove.py -l "/path/to/dir/containing/backups" -d "\%Y\%m\%d" -p
 * __-d or --date-format__: Date format (required). The date format specified in this example will match dates in this format: 20211201.
 * __-p or --regex-pattern__: Regex pattern for recognizing the date in the file or folder names, so the script will know which part to parse as a date (required).
 * __-m or --max-backup-count__: Max backups to keep (required). In this example the 90 most recent backups will be kept.
+* __-f or --file-pattern__: Optional regex pattern for recognizing the backup files or folders. 
