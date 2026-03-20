@@ -11,6 +11,12 @@ import shutil
 import traceback
 
 
+def filter_elements(elements, regex_pattern) -> list[str]:
+    pattern = re.compile(regex_pattern)
+
+    return list(filter(pattern.match, elements))
+
+
 def parse_date(regex_pattern, filename, date_format):
     if regex_pattern is None or len(regex_pattern) < 1:
         raise ValueError("Argument 'regex_pattern' cannot be None or empty!")
@@ -32,13 +38,13 @@ def get_backups_to_remove(all_backups, max_backup_count):
     if max_backup_count < 0:
         raise ValueError("Argument 'max_backup_count' cannot be less than 0")
 
-    backups_to_remove = []
+    to_remove = []
     remove_count = len(all_backups) - max_backup_count if not all_backups is None else 0
     if remove_count > 0:
         all_backups.sort(key=lambda e: e[0])
         for i in range(0, remove_count):
-            backups_to_remove.append(all_backups[i][1])
-    return backups_to_remove
+            to_remove.append(all_backups[i][1])
+    return to_remove
 
 
 def location_is_valid(path):
@@ -49,7 +55,7 @@ def location_is_valid(path):
 
 if __name__ == "__main__":
     try:
-        print("Starting autoremove...")
+        print(f"Starting {sys.argv[0]}...")
 
         parser = ArgumentParser(description="Deletes the oldest backups (files or folders) at the specified location",
                                 add_help=False)
@@ -61,6 +67,8 @@ if __name__ == "__main__":
                             help="Regex pattern that matches the date in file or folder name")
         parser.add_argument("-m", "--max-backup-count", dest="max_backups", type=int, required=True,
                             help="Number of backups allowed at the specified location")
+        parser.add_argument("-f", "--file-pattern", dest="file_pattern", type=str, required=False,
+                            help="Regex pattern to filter the files and folders at the selected location")
         arguments = vars(parser.parse_args())
 
         if not location_is_valid(arguments["location"]):
@@ -70,8 +78,10 @@ if __name__ == "__main__":
 
         print(f"Reading files at {arguments['location']}")
         files = os.listdir(arguments["location"])
-        backups = []
+        if "file_pattern" in arguments and not arguments["file_pattern"] is None:
+            files = filter_elements(files, arguments["file_pattern"])
 
+        backups = []
         for file in files:
             try:
                 backup_datetime = parse_date(arguments["regex_pattern"], file, arguments["date_format"])
@@ -80,7 +90,7 @@ if __name__ == "__main__":
                 print(f"Backup found: {file}")
                 backups.append((backup_datetime, file))
             except ValueError:
-                print(f"Error paring date from file: {file} - skipping to next!")
+                print(f"Error parsing date from file: {file} - skipping to next!")
                 continue
 
         print("Checking for backups to remove...")
