@@ -62,7 +62,7 @@ if __name__ == "__main__":
         parser.add_argument("-l", "--location", dest="location", type=str, required=True,
                             help="Folder containing the backup folders or files")
         parser.add_argument("-d", "--date-format", dest="date_format", type=str, required=True,
-                            help="Format for parsing the date from the file or folder name (e.g. %Y-%m-%d)")
+                            help="Format for parsing the date from the file or folder name")
         parser.add_argument("-p", "--regex-pattern", dest="regex_pattern", type=str, required=True,
                             help="Regex pattern that matches the date in file or folder name")
         parser.add_argument("-m", "--max-backup-count", dest="max_backups", type=int, required=True,
